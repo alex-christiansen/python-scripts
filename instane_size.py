@@ -1,0 +1,70 @@
+from dotenv import load_dotenv
+import requests
+import os
+import json
+from urllib.parse import urlparse
+
+# Set Globals / import env variables
+load_dotenv()
+base_url = os.getenv('base_url')
+client_id = os.getenv('client_id')
+client_secret = os.getenv('client_secret')
+
+# Log into the API and grab bearer token
+api_call = f'/login?client_id={client_id}&client_secret={client_secret}'
+response = requests.request("POST", base_url+api_call)
+bearer_token = json.loads(response.text)['access_token']
+headers = {
+  'Authorization': 'Bearer %s' % bearer_token
+}
+
+# Get all lookml models
+api_call = '/lookml_models'
+response = requests.request("GET", base_url+api_call, headers=headers)
+model_response_time = response.elapsed.total_seconds()
+total_models = len(json.loads(response.text))
+
+# Project Data
+api_call = '/projects'
+response = requests.request("GET", base_url+api_call, headers=headers)
+project_response_time = response.elapsed.total_seconds()
+total_projects = len(json.loads(response.text))
+
+print(f"""
+The {urlparse(base_url)[1].split(".")[0]} instance has the following statistics:
+    Total Models: {total_models}
+    Model Response Time: {model_response_time}
+    Total Projects: {total_projects}
+    Project Response Time: {project_response_time}
+""")
+
+
+
+
+# # # output can be treated like a dictionary
+# def collect_all_models():
+#     total_models = len(sdk.all_lookml_models())
+
+# print(timeit.timeit('collect_all_models()',number=1))
+# total_projects = len(sdk.all_projects())
+# host_name = urlparse(sdk.get_setting()["host_url"])[1].split(".")[0]
+# print(f"""
+# The instance: {host_name} has {total_models} models and {total_projects} projects
+# """)
+
+
+# import requests
+
+# url = "https://4eb3a021-23dd-4db4-baf2-a77f5a0f3e6b.looker.app/api/4.0//lookml_models"
+
+# payload = {}
+# headers = {
+#   'Authorization': 'Bearer bKPyj4Nv94MVTVnttnRVSTG2zkT7XpKhK7XHVkhQ'
+# }
+
+# response = requests.request("GET", url, headers=headers, data=payload)
+# print(response.elapsed.total_seconds())
+# print(response.text)
+
+# response = requests.post(url, data=post_fields, timeout=timeout)
+# print(response.elapsed.total_seconds())
